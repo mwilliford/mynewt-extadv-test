@@ -39,7 +39,7 @@ struct log bleprph_log;
 #define MAX_CBMEM_BUF 2048
 
 struct os_task my_task;
-os_stack_t my_task_stack[MY_STACK_SIZE];
+//os_stack_t my_task_stack[MY_STACK_SIZE];
 uint32_t *cbmem_buf;
 struct cbmem cbmem;
 
@@ -208,7 +208,8 @@ start_observing() {
         return;
     }
 
-    rc = ble_gap_ext_disc(own_addr_type, disc_params.window, disc_params.window, 0, BLE_HCI_SCAN_FILT_NO_WL, 0, &uncoded, NULL, ble_observer_gap_event, NULL);
+    rc = ble_gap_ext_disc(own_addr_type, disc_params.window, disc_params.window, 0, BLE_HCI_SCAN_FILT_NO_WL, 0,
+                          &uncoded, NULL, ble_observer_gap_event, NULL);
     assert(rc == 0);
 }
 

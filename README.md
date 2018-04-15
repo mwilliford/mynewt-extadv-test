@@ -4,7 +4,7 @@
 
 - build as usual
 - I tested on nrf52832 (i don't have too many of the 840's yet)
-- Deploy on 2 devices, so they talk back and forth.  They both trasnmit, and both receive extended adv packets.
+- Deploy on 2 devices, so they talk back and forth.  They both transmit, and both receive extended adv packets.
 - The test software will print the results of observed packets, and note if they match what was sent.
 
 ## Summary of Issues

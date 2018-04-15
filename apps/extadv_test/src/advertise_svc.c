@@ -69,9 +69,10 @@ advertise_svc_unlock(void)
  *
  * @param evt
  */
-inline static void unwrap_evt_cb_free(struct os_event* evt) {
+static void unwrap_evt_cb_free(struct os_event* evt) {
     advertise_svc_evt_t *aevt = evt->ev_arg;
-    aevt->done(aevt->adv_data, aevt->done_arg); // callback client to ask for this to be free, mbuf inside our wrapped event, which client holds
+    //aevt->done(aevt->adv_data, aevt->done_arg); seems setData on nimble already put the mbuf back
+    aevt->done(aevt->done_arg); // general notification callback
     // now free os_evt
     os_memblock_put(&advertise_svc_mempool, aevt); // release advertise_svc_evt_t, which includes space for os_event
 }
@@ -198,7 +199,7 @@ ble_app_advertise(struct ble_gap_ext_adv_params *adv_params, struct os_mbuf* adv
  *
  *
  */
-void advertise_svc_send(const struct ble_gap_ext_adv_params *adv_params, struct os_mbuf* adv_data, int duration, int max_events, void(*cb)(struct os_mbuf*, void* arg), void* arg) {
+void advertise_svc_send(const struct ble_gap_ext_adv_params *adv_params, struct os_mbuf* adv_data, int duration, int max_events, void(*cb)(void* arg), void* arg) {
     static advertise_svc_evt_t *evt;
     evt = os_memblock_get(&advertise_svc_mempool);
 

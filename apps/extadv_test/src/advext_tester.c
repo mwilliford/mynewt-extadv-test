@@ -24,24 +24,25 @@
 
 
 
-#define ADVEXT_TESTER_STACK_SIZE (200)
+#define ADVEXT_TESTER_STACK_SIZE (300)
 #define ADVEXT_TESTER_TASK_PRIO         (129)
+#define ADVEXT_TESTER_PAYLOAD_SIZE OS_ALIGN(MYNEWT_VAL(BLE_HCI_EVT_BUF_SIZE), 4)
 
-#define ADVEXT_TESTER_POOL_SIZE (MYNEWT_VAL(BLE_HCI_EVT_BUF_SIZE) + \
+#define ADVEXT_TESTER_NUM_BUFFS  (1)
+#define ADVEXT_TESTER_POOL_SIZE (ADVEXT_TESTER_PAYLOAD_SIZE + \
                             sizeof(struct os_mbuf) + sizeof(struct os_mbuf_pkthdr))
 
 static struct os_mempool advext_tester_adv_pool;
 static struct os_mbuf_pool advext_tester_mbuf_pool;
-static os_membuf_t advext_tester_mem[OS_MEMPOOL_SIZE(1, ADVEXT_TESTER_POOL_SIZE)];
+static os_membuf_t advext_tester_mem[OS_MEMPOOL_SIZE(ADVEXT_TESTER_NUM_BUFFS, ADVEXT_TESTER_POOL_SIZE)];
 
 struct os_task advext_task;
 os_stack_t advext_tester_task_stack[ADVEXT_TESTER_STACK_SIZE];
 
 uint8_t * test_pattern;
 
-void advext_tester_data_free(struct os_mbuf* buff, void* arg) {
-    //console_printf("free called on advertise_client_data\n");
-    os_mbuf_free(buff);
+void advext_tester_cb(void* arg) {
+    console_printf("adv done\n");
 }
 
 void advext_tester_go(void* buf, uint16_t len, uint16_t duration, uint16_t interval, uint32_t tstamp) {
@@ -70,7 +71,7 @@ void advext_tester_go(void* buf, uint16_t len, uint16_t duration, uint16_t inter
     adv_params.secondary_phy = 0x01; // 1M for now, will test 2M later
     adv_params.tx_power = 127;
 
-    advertise_svc_send(&adv_params, mbuf, duration/10, 0, advext_tester_data_free, NULL);
+    advertise_svc_send(&adv_params, mbuf, duration/10, 0, advext_tester_cb, NULL);
 }
 
 
@@ -108,11 +109,11 @@ void advext_tester_init(void) {
 
 
 
-    rc = os_mempool_init(&advext_tester_adv_pool, 1, ADVEXT_TESTER_POOL_SIZE,
+    rc = os_mempool_init(&advext_tester_adv_pool, ADVEXT_TESTER_NUM_BUFFS, ADVEXT_TESTER_POOL_SIZE,
                          advext_tester_mem, "adv_client_ext_adv_mem");
     assert(rc == 0);
     rc = os_mbuf_pool_init(&advext_tester_mbuf_pool, &advext_tester_adv_pool,
-                           ADVEXT_TESTER_POOL_SIZE, 1);
+                           ADVEXT_TESTER_POOL_SIZE, ADVEXT_TESTER_NUM_BUFFS);
     assert(rc == 0);
 
     os_task_init(&advext_task, "advext_tester", advext_tester_task_func, NULL, ADVEXT_TESTER_TASK_PRIO,

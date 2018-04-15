@@ -68,3 +68,5 @@ syscfg.vals:
 #    BLE_EXT_ADV_MAX_SIZE: 238
     BLE_EXT_ADV_MAX_SIZE: 1024
 
+    OS_MEMPOOL_POISON: 1
+

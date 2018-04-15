@@ -14,12 +14,12 @@
 
 void adv_lightevent_listener_init();
 void adv_ext_event_listener_init();
-void advertise_svc_send(const struct ble_gap_ext_adv_params *adv_params, struct os_mbuf* adv_data, int duration, int max_events, void(*cb)(struct os_mbuf*, void* arg), void* arg);
+void advertise_svc_send(const struct ble_gap_ext_adv_params *adv_params, struct os_mbuf* adv_data, int duration, int max_events, void(*cb)(void* arg), void* arg);
 typedef struct advertise_svc_evt {
     struct os_event os_evt;
     struct ble_gap_ext_adv_params adv_params;
     struct os_mbuf* adv_data;
-    void(*done)(struct os_mbuf*, void* arg);
+    void(*done)(void* arg);
     void* done_arg;
     int duration;
     int max_events;
