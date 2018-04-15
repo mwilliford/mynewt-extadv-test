@@ -1,0 +1,73 @@
+diff --git a/nimble/controller/include/controller/ble_ll.h b/nimble/controller/include/controller/ble_ll.h
+index 4d2e616..af38e2b 100644
+--- a/nimble/controller/include/controller/ble_ll.h
++++ b/nimble/controller/include/controller/ble_ll.h
+@@ -165,9 +165,9 @@ STATS_SECT_START(ble_ll_stats)
+     STATS_SECT_ENTRY(scan_req_txg)
+     STATS_SECT_ENTRY(scan_rsp_txg)
+     STATS_SECT_ENTRY(aux_missed_adv)
+-    STATS_SECT_ENTRY(aux_scheduled)
++    STATS_SECT_ENTRY(aux_scheduled) // 36
+     STATS_SECT_ENTRY(aux_received)
+-    STATS_SECT_ENTRY(aux_fired_for_read)
++    STATS_SECT_ENTRY(aux_fired_for_read) // 38
+     STATS_SECT_ENTRY(aux_conn_req_tx)
+     STATS_SECT_ENTRY(aux_conn_rsp_tx)
+     STATS_SECT_ENTRY(aux_conn_rsp_err)
+diff --git a/nimble/controller/src/ble_ll_adv.c b/nimble/controller/src/ble_ll_adv.c
+index 9bb52de..4e87f9a 100644
+--- a/nimble/controller/src/ble_ll_adv.c
++++ b/nimble/controller/src/ble_ll_adv.c
+@@ -454,8 +454,12 @@ ble_ll_adv_pdu_make(uint8_t *dptr, void *pducb_arg, uint8_t *hdr_byte)
+     dptr += BLE_LL_EXT_ADV_DATA_INFO_SIZE;
+ 
+     /* AuxPtr */
+-    assert(AUX_CURRENT(advsm)->sch.enqueued);
+-    offset = AUX_CURRENT(advsm)->start_time - advsm->adv_pdu_start_time;
++
++    if(AUX_CURRENT(advsm)->sch.enqueued) {
++        offset = AUX_CURRENT(advsm)->start_time - advsm->adv_pdu_start_time;
++    } else {
++        offset = 0;
++    }
+     ble_ll_adv_put_aux_ptr(advsm, offset, dptr);
+ 
+     return BLE_LL_EXT_ADV_HDR_LEN + ext_hdr_len;
+@@ -1147,15 +1151,17 @@ ble_ll_adv_aux_schedule_next(struct ble_ll_adv_sm *advsm)
+     aux = AUX_CURRENT(advsm);
+     aux_next = AUX_NEXT(advsm);
+ 
+-    assert(aux->sch.enqueued);
+     assert(!aux_next->sch.enqueued);
+-
+-    /*
+-     * In general we do not schedule next aux if current aux does not have
+-     * AuxPtr in extended header as this means we do not need subsequent
+-     * ADV_CHAIN_IND to be sent.
+-     * However, if current aux is scannable we allow to schedule next aux as
+-     * this will be 1st ADV_CHAIN_IND of scan response.
++/*
++    +     * Do not schedule next aux if current aux is no longer scheduled since we
++    +     * do not have reference time for scheduling.
++*/
++    if (!aux->sch.enqueued) {
++        return;
++    }
++     /*
++      * Do not schedule next aux if current aux does not have AuxPtr in extended
++      * header as this means we do not need subsequent ADV_CHAIN_IND to be sent.
+      */
+     if (!(aux->ext_hdr & (1 << BLE_LL_EXT_ADV_AUX_PTR_BIT))) {
+         return;
+@@ -2916,7 +2922,10 @@ ble_ll_adv_done(struct ble_ll_adv_sm *advsm)
+     uint32_t tick_itvl;
+     uint32_t start_time;
+ 
+-    assert(advsm->adv_enabled);
++//    assert(advsm->adv_enabled); // not sure if this is important, but I hit it a lot
++    if (!advsm->adv_enabled) {
++        return; // we are not enabled
++    }
+ 
+ #if MYNEWT_VAL(BLE_LL_CFG_FEAT_LL_EXT_ADV)
+     if (advsm->props & BLE_HCI_LE_SET_EXT_ADV_PROP_LEGACY) {
