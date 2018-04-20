@@ -77,6 +77,10 @@ static void unwrap_evt_cb_free(struct os_event* evt) {
     os_memblock_put(&advertise_svc_mempool, aevt); // release advertise_svc_evt_t, which includes space for os_event
 }
 /**
+ *
+ * Start and/or replace currently running advertisement on instance 0
+ * TODO: manage multiple instances in parallel
+ *
  * @context advertise_svc task
 
  * @param evt
@@ -106,9 +110,6 @@ inline static void do_advertise_handler(struct os_event * evt) {
 
 // ---------- unlock
     advertise_svc_unlock();
-
-
-
 
     ble_app_advertise(&aevt->adv_params, aevt->adv_data, aevt->duration, aevt->max_events);
 }

@@ -40,8 +40,8 @@ struct log bleprph_log;
 
 struct os_task my_task;
 //os_stack_t my_task_stack[MY_STACK_SIZE];
-uint32_t *cbmem_buf;
-struct cbmem cbmem;
+//uint32_t *cbmem_buf;
+//struct cbmem cbmem;
 
 
 
@@ -55,20 +55,20 @@ print_addr(const void *addr)
                    u8p[5], u8p[4], u8p[3], u8p[2], u8p[1], u8p[0]);
 }
 
-void wall_clock_print() {
-    struct os_timeval tv;
-    struct os_timezone tz;
-    char buf[DATETIME_BUFSIZE];
-    int rc;
-
-    /* Display the current datetime */
-    rc = os_gettimeofday(&tv, &tz);
-    assert(rc == 0);
-    rc = datetime_format(&tv, &tz, buf, sizeof(buf));
-    assert(rc == 0);
-    console_printf("%s\n", buf);
-
-}
+//void wall_clock_print() {
+//    struct os_timeval tv;
+//    struct os_timezone tz;
+//    char buf[DATETIME_BUFSIZE];
+//    int rc;
+//
+//    /* Display the current datetime */
+//    rc = os_gettimeofday(&tv, &tz);
+//    assert(rc == 0);
+//    rc = datetime_format(&tv, &tz, buf, sizeof(buf));
+//    assert(rc == 0);
+//    console_printf("%s\n", buf);
+//
+//}
 
 static void
 ble_app_set_addr(void)
@@ -186,6 +186,9 @@ ble_observer_gap_event(struct ble_gap_event *event, void *arg) {
         case BLE_GAP_EVENT_DISC_COMPLETE:
             console_printf("disc complete\n");
             return 0;
+        default:
+            console_printf("other event %d", event->type);
+            assert(false);
     }
     return 0;
 
@@ -196,8 +199,8 @@ start_observing() {
     int rc;
     struct ble_gap_ext_disc_params uncoded = {0};
 
-    uncoded.window = disc_params.window;
-    uncoded.itvl = disc_params.itvl;
+    uncoded.window = disc_params.window = 30;
+    uncoded.itvl = disc_params.itvl = 50;
     uncoded.passive = true;
 
     uint8_t own_addr_type;
@@ -208,7 +211,7 @@ start_observing() {
         return;
     }
 
-    rc = ble_gap_ext_disc(own_addr_type, disc_params.window, disc_params.window, 0, BLE_HCI_SCAN_FILT_NO_WL, 0,
+    rc = ble_gap_ext_disc(own_addr_type, 0, 0, 0, BLE_HCI_SCAN_FILT_NO_WL, 0,
                           &uncoded, NULL, ble_observer_gap_event, NULL);
     assert(rc == 0);
 }
@@ -238,8 +241,9 @@ main(int argc, char **argv)
     // memcpy(g_dev_addr, (uint8_t[6]){0x0a, 0x0a, 0x0a, 0x0a, 0x0a, 0x0a}, 6);
 
     // setup logging for general handler
-    cbmem_buf = malloc(sizeof(uint32_t) * MAX_CBMEM_BUF);
-    cbmem_init(&cbmem, cbmem_buf, MAX_CBMEM_BUF);
+   // cbmem_buf = malloc(sizeof(uint32_t) * MAX_CBMEM_BUF);
+   // assert(cbmem_buf);
+   // cbmem_init(&cbmem, cbmem_buf, MAX_CBMEM_BUF);
 
     sysinit();
 
@@ -247,7 +251,7 @@ main(int argc, char **argv)
     log_register("ble_hs", &ble_hs_log, &log_console_handler, NULL,
                  LOG_SYSLEVEL);
 
-    wall_clock_print();
+   // wall_clock_print();
 
 
     /* As the last thing, process events from default event queue. */
