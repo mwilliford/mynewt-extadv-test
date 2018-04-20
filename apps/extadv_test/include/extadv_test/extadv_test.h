@@ -38,7 +38,9 @@
 #define EXTADV_TEST_PATTERN_LEN (600)
 #define EXTADV_DURATION (MYNEWT_VAL(EXTADV_DURATION))
 #define EXTADV_INTERVAL (MYNEWT_VAL(EXTADV_INTERVAL))
+#define EXTADV_MAX_EVENTS (MYNEWT_VAL(EXTADV_MAX_EVENTS))
 extern uint8_t * test_pattern;
 
+void advext_tester_send();
 
 #endif

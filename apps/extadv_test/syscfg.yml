@@ -24,10 +24,13 @@ syscfg.defs:
     value: 10
   EXTADV_DURATION:
     description: "duration of broadcast in ms"
-    value: 400
+    value: 600
   EXTADV_INTERVAL:
     description: "advertisement interval"
     value: 30
+  EXTADV_MAX_EVENTS:
+    description: "max events for broadcast"
+    value: 6
 
 
 # Settings this app overrides.

@@ -21,17 +21,10 @@
 #include "nimble/ble.h"
 #include "host/ble_gap.h"
 #include "host/ble_hs.h"
+#include "extadv_test/extadv_test.h"
 
 struct ble_gap_ext_disc_params disc_params;
 
-
-void wall_clock_print();
-/* Define task stack and task object */
-
-
-//struct pwm_dev* pwm;
-/** Log data. */
-struct log bleprph_log;
 
 
 #define MY_TASK_PRIO         (128)
@@ -39,10 +32,6 @@ struct log bleprph_log;
 #define MAX_CBMEM_BUF 2048
 
 struct os_task my_task;
-//os_stack_t my_task_stack[MY_STACK_SIZE];
-//uint32_t *cbmem_buf;
-//struct cbmem cbmem;
-
 
 
 void
@@ -54,21 +43,6 @@ print_addr(const void *addr)
     console_printf("%02x:%02x:%02x:%02x:%02x:%02x",
                    u8p[5], u8p[4], u8p[3], u8p[2], u8p[1], u8p[0]);
 }
-
-//void wall_clock_print() {
-//    struct os_timeval tv;
-//    struct os_timezone tz;
-//    char buf[DATETIME_BUFSIZE];
-//    int rc;
-//
-//    /* Display the current datetime */
-//    rc = os_gettimeofday(&tv, &tz);
-//    assert(rc == 0);
-//    rc = datetime_format(&tv, &tz, buf, sizeof(buf));
-//    assert(rc == 0);
-//    console_printf("%s\n", buf);
-//
-//}
 
 static void
 ble_app_set_addr(void)
@@ -172,9 +146,6 @@ ble_observer_decode_event_type(struct ble_gap_ext_disc_desc *desc)
 
 static int
 ble_observer_gap_event(struct ble_gap_event *event, void *arg) {
-//    struct ble_gap_conn_desc desc;
-//    int conn_idx;
-//    int rc;
 
     switch (event->type) {
         case BLE_GAP_EVENT_EXT_DISC: {
@@ -223,13 +194,8 @@ ble_on_sync(void)
     console_printf("ble_app_on_sync\n");
     ble_app_set_addr();
     start_observing();
+    advext_tester_send();
 }
-
-
-
-
-
-
 
 int
 main(int argc, char **argv)
@@ -238,20 +204,12 @@ main(int argc, char **argv)
 
     ble_hs_cfg.sync_cb = ble_on_sync;
 
-    // memcpy(g_dev_addr, (uint8_t[6]){0x0a, 0x0a, 0x0a, 0x0a, 0x0a, 0x0a}, 6);
-
-    // setup logging for general handler
-   // cbmem_buf = malloc(sizeof(uint32_t) * MAX_CBMEM_BUF);
-   // assert(cbmem_buf);
-   // cbmem_init(&cbmem, cbmem_buf, MAX_CBMEM_BUF);
 
     sysinit();
 
     /* Initialize the NimBLE host configuration. */
     log_register("ble_hs", &ble_hs_log, &log_console_handler, NULL,
                  LOG_SYSLEVEL);
-
-   // wall_clock_print();
 
 
     /* As the last thing, process events from default event queue. */

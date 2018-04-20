@@ -28,7 +28,7 @@
 #define ADVEXT_TESTER_TASK_PRIO         (129)
 #define ADVEXT_TESTER_PAYLOAD_SIZE OS_ALIGN(MYNEWT_VAL(BLE_HCI_EVT_BUF_SIZE), 4)
 
-#define ADVEXT_TESTER_NUM_BUFFS  (1)
+#define ADVEXT_TESTER_NUM_BUFFS  (2)
 #define ADVEXT_TESTER_POOL_SIZE (ADVEXT_TESTER_PAYLOAD_SIZE + \
                             sizeof(struct os_mbuf) + sizeof(struct os_mbuf_pkthdr))
 
@@ -38,14 +38,17 @@ static os_membuf_t advext_tester_mem[OS_MEMPOOL_SIZE(ADVEXT_TESTER_NUM_BUFFS, AD
 
 struct os_task advext_task;
 os_stack_t advext_tester_task_stack[ADVEXT_TESTER_STACK_SIZE];
+struct os_eventq advext_evtq;
+struct os_event advext_event;
 
 uint8_t * test_pattern;
 
 void advext_tester_cb(void* arg) {
-    console_printf("adv done\n");
+    console_printf("adv done, calling it again\n");
+    advext_tester_send();
 }
 
-void advext_tester_go(void* buf, uint16_t len, uint16_t duration, uint16_t interval, uint32_t tstamp) {
+void advext_tester_go(void* buf, uint16_t len, uint16_t duration, int max_events, uint16_t interval) {
 
     int ret;
 
@@ -71,22 +74,28 @@ void advext_tester_go(void* buf, uint16_t len, uint16_t duration, uint16_t inter
     adv_params.secondary_phy = 0x01; // 1M for now, will test 2M later
     adv_params.tx_power = 127;
 
-    advertise_svc_send(&adv_params, mbuf, duration/10, 0, advext_tester_cb, NULL);
+    advertise_svc_send(&adv_params, mbuf, duration, max_events, advext_tester_cb, NULL);
 }
 
+void advext_tester_handler(struct os_event* evt) {
+    uint32_t os_tick;
+    os_time_ms_to_ticks(100, &os_tick);
+    os_time_delay(os_tick); // schedule some pause
+    advext_tester_go(test_pattern, EXTADV_TEST_PATTERN_LEN, EXTADV_DURATION, EXTADV_MAX_EVENTS, EXTADV_INTERVAL);
+}
+
+void advext_tester_send() {
+    bzero(&advext_event, sizeof(struct os_event));
+    advext_event.ev_cb =  advext_tester_handler;
+    advext_event.ev_arg = NULL;
+    os_eventq_put(&advext_evtq, &advext_event); // queue it
+}
 
 void advext_tester_task_func(void *arg) {
-    uint32_t os_ticks;
 
     /* The task is a forever loop that does not return */
     while (1) {
-        /* Wait one second */
-        os_time_ms_to_ticks(500, &os_ticks);
-        os_time_delay(os_ticks);
-
-
-        advext_tester_go(test_pattern, EXTADV_TEST_PATTERN_LEN, EXTADV_DURATION, EXTADV_INTERVAL, 0xffffffff );
-
+        os_eventq_run(&advext_evtq);
     }
 }
 
@@ -106,7 +115,9 @@ void advext_tester_init(void) {
         test_pattern[i] = (uint8_t )i; // fake data
     }
 
+    bzero(&advext_event, sizeof(struct os_event));
 
+    os_eventq_init(&advext_evtq);
 
 
     rc = os_mempool_init(&advext_tester_adv_pool, ADVEXT_TESTER_NUM_BUFFS, ADVEXT_TESTER_POOL_SIZE,

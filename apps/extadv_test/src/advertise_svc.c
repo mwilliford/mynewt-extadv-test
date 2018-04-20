@@ -71,9 +71,7 @@ advertise_svc_unlock(void)
  */
 static void unwrap_evt_cb_free(struct os_event* evt) {
     advertise_svc_evt_t *aevt = evt->ev_arg;
-    //aevt->done(aevt->adv_data, aevt->done_arg); seems setData on nimble already put the mbuf back
     aevt->done(aevt->done_arg); // general notification callback
-    // now free os_evt
     os_memblock_put(&advertise_svc_mempool, aevt); // release advertise_svc_evt_t, which includes space for os_event
 }
 /**
@@ -187,15 +185,14 @@ ble_app_advertise(struct ble_gap_ext_adv_params *adv_params, struct os_mbuf* adv
  * Send an advertisement data mbuf
  *
  * This will add the advertising request to the queue for sched
- * When advertisement is done or canceled, cb is called, you should clean up your adv_data memory on that call.
- * adv_params is copied off, so caller can free that memory or use local for that datastructure.
+ * When advertisement is done or canceled, cb is called.
  *
  *
  * @param adv_params    extended adv params - we copy off, we don't hold a reference to this
  * @param adv_data      data for advertising - we hold a reference, clean up when we call cb
  * @param duration      Duration of adv event
  * @param max_events    not sure what this does, passed to hci - reserach it.
- * @param cb            Called so caller can clean up and free mbuf:  void(*cb)(struct os_mbuf*, void* arg)
+ * @param cb            void(*cb)(void* arg)
  * @param cbarg         Provided to callback so you can dispose of some additional datastructures if needed, put anything in here
  *
  *
