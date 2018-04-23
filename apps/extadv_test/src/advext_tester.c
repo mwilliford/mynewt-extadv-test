@@ -45,6 +45,7 @@ uint8_t * test_pattern;
 
 void advext_tester_cb(void* arg) {
     console_printf("adv done, calling it again\n");
+    os_time_delay(OS_TICKS_PER_SEC/3);
     advext_tester_send();
 }
 

@@ -193,7 +193,9 @@ ble_on_sync(void)
     /* Generate a non-resolvable private address. */
     console_printf("ble_app_on_sync\n");
     ble_app_set_addr();
-    start_observing();
+    if (true) {
+        start_observing();
+    }
     advext_tester_send();
 }
 

@@ -24,7 +24,7 @@ syscfg.defs:
     value: 10
   EXTADV_DURATION:
     description: "duration of broadcast in ms"
-    value: 600
+    value: 1000
   EXTADV_INTERVAL:
     description: "advertisement interval"
     value: 30
@@ -67,9 +67,10 @@ syscfg.vals:
     LOG_LEVEL: 1
 
 
-    BLE_HCI_EVT_BUF_SIZE: 1024
+    BLE_HCI_EVT_BUF_SIZE: 300
 #    BLE_EXT_ADV_MAX_SIZE: 238
     BLE_EXT_ADV_MAX_SIZE: 1024
 
     OS_MEMPOOL_POISON: 1
+    STATS_NAMES: 1
 
