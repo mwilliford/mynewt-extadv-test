@@ -183,7 +183,7 @@ start_observing() {
         return;
     }
 
-    rc = ble_gap_ext_disc(own_addr_type, 0, 0, 1, BLE_HCI_SCAN_FILT_NO_WL, 0,
+    rc = ble_gap_ext_disc(own_addr_type, 0, 0, 0, BLE_HCI_SCAN_FILT_NO_WL, 0,
                           &uncoded, NULL, ble_observer_gap_event, NULL);
     assert(rc == 0);
 }
