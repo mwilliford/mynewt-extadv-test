@@ -183,7 +183,7 @@ start_observing() {
         return;
     }
 
-    rc = ble_gap_ext_disc(own_addr_type, 0, 0, 0, BLE_HCI_SCAN_FILT_NO_WL, 0,
+    rc = ble_gap_ext_disc(own_addr_type, 0, 0, 1, BLE_HCI_SCAN_FILT_NO_WL, 0,
                           &uncoded, NULL, ble_observer_gap_event, NULL);
     assert(rc == 0);
 }
@@ -197,7 +197,9 @@ ble_on_sync(void)
     if (true) {
         start_observing();
     }
-    advext_tester_send();
+    if (false) {
+        advext_tester_send();
+    }
 }
 
 int
@@ -210,9 +212,10 @@ main(int argc, char **argv)
 
     sysinit();
 
+
     /* Initialize the NimBLE host configuration. */
     log_register("ble_hs", &ble_hs_log, &log_console_handler, NULL,
-                 LOG_SYSLEVEL);
+                 LOG_LEVEL_DEBUG);
 
 
     /* As the last thing, process events from default event queue. */

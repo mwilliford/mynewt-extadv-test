@@ -42,6 +42,7 @@ struct os_eventq advext_evtq;
 struct os_event advext_event;
 
 uint8_t * test_pattern;
+uint8_t sid;
 
 void advext_tester_cb(void* arg) {
     console_printf("adv done, calling it again\n");
@@ -67,13 +68,15 @@ void advext_tester_go(void* buf, uint16_t len, uint16_t duration, int max_events
     struct ble_gap_ext_adv_params adv_params;
     adv_params = (struct ble_gap_ext_adv_params){ 0 };
     adv_params.itvl_min = ADV_INT_EXT(interval);
-    adv_params.itvl_max = ADV_INT_EXT(interval+10); // auto spread to 10ms to randomize
+    adv_params.itvl_max = ADV_INT_EXT(interval+30); // auto spread to 10ms to randomize
     adv_params.connectable = false;
     adv_params.legacy_pdu = false;
     adv_params.scannable = false;
     adv_params.primary_phy = 0x01; // 1M = 0x01, 2M = 0x02
     adv_params.secondary_phy = 0x01; // 1M for now, will test 2M later
     adv_params.tx_power = 127;
+    adv_params.sid = sid % 0xf;
+    sid++;
 
     advertise_svc_send(&adv_params, mbuf, duration, max_events, advext_tester_cb, NULL);
 }
