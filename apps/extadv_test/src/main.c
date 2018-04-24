@@ -55,29 +55,31 @@ ble_app_set_addr(void)
 }
 
 static void
-ble_observer_decode_adv_data(uint8_t *adv_data, uint8_t adv_data_len)
+ble_observer_decode_adv_data(uint8_t *adv_data, uint8_t adv_data_len, int status)
 {
     //struct ble_hs_adv_fields fields;
 
-//    console_printf(" length_data=%d data=", adv_data_len);
-//    //print_bytes(adv_data, adv_data_len);
-//    for (int i = 0; i < adv_data_len; i++) {
-//        console_printf("%02x ", adv_data[i]);
+    console_printf(" length_data=%d data=", adv_data_len);
+    //print_bytes(adv_data, adv_data_len);
+    for (int i = 0; i < adv_data_len; i++) {
+        console_printf("%02x ", adv_data[i]);
+    }
+    console_printf("\n");
+
+    //int expected = EXTADV_TEST_PATTERN_LEN;
+    if (status == 0 ) { // completed
+        console_printf("*************************************** completed ******************************");
+    }
+//    if (EXTADV_TEST_PATTERN_LEN != adv_data_len) {
+//        console_printf("********* NO SIZE MATCH - BAD!  expected = %d : was = %d\n", expected, adv_data_len);
+//        return;
 //    }
-//    console_printf("\n");
-
-    int expected = EXTADV_TEST_PATTERN_LEN;
-
-    if (EXTADV_TEST_PATTERN_LEN != adv_data_len) {
-        console_printf("********* NO SIZE MATCH - BAD!  expected = %d : was = %d\n", expected, adv_data_len);
-        return;
-    }
-
-    if (strncmp((char*)test_pattern, (char*)adv_data, expected) != 0) {
-        console_printf("********* NO MATCH - BAD!\n");
-    } else {
-        console_printf("good match\n");
-    }
+//
+//    if (strncmp((char*)test_pattern, (char*)adv_data, expected) != 0) {
+//        console_printf("********* NO MATCH - BAD!\n");
+//    } else {
+//        console_printf("good match\n");
+//    }
 }
 
 
@@ -101,19 +103,18 @@ ble_observer_decode_event_type(struct ble_gap_ext_disc_desc *desc)
         console_printf("'dir' ");
         directed = 1;
     }
-
     if (desc->props & BLE_HCI_ADV_SCAN_RSP_MASK) {
         console_printf("'scan rsp' ");
     }
 
     switch(desc->data_status) {
-        case BLE_HCI_ADV_DATA_STATUS_COMPLETE:
+        case 0x00:
             console_printf("completed");
             break;
-        case BLE_HCI_ADV_DATA_STATUS_INCOMPLETE:
+        case 0x01:
             console_printf("incompleted");
             break;
-        case BLE_HCI_ADV_DATA_STATUS_TRUNCATED:
+        case 0x02:
             console_printf("truncated");
             break;
         case BLE_HCI_ADV_DATA_STATUS_MASK:
@@ -140,7 +141,7 @@ ble_observer_decode_event_type(struct ble_gap_ext_disc_desc *desc)
         return;
     }
 
-    ble_observer_decode_adv_data(desc->data, desc->length_data);
+    ble_observer_decode_adv_data(desc->data, desc->length_data, desc->data_status);
 }
 
 
