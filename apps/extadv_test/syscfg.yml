@@ -24,13 +24,13 @@ syscfg.defs:
     value: 10
   EXTADV_DURATION:
     description: "duration of broadcast in ms"
-    value: 1000
+    value: 2000
   EXTADV_INTERVAL:
     description: "advertisement interval"
     value: 50
   EXTADV_MAX_EVENTS:
     description: "max events for broadcast"
-    value: 6
+    value: 20
 
 
 # Settings this app overrides.
@@ -64,7 +64,7 @@ syscfg.vals:
     BLE_ROLE_OBSERVER: 1
 
 
-    LOG_LEVEL: 0
+    LOG_LEVEL: 1
 
 
     BLE_HCI_EVT_BUF_SIZE: 254
@@ -74,4 +74,7 @@ syscfg.vals:
     OS_MEMPOOL_POISON: 1
     STATS_NAMES: 1
 
+    CONSOLE_RTT: 1
+    CONSOLE_UART: 0
+    CONSOLE_ECHO: 0
 

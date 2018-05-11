@@ -209,9 +209,7 @@ main(int argc, char **argv)
 
     ble_hs_cfg.sync_cb = ble_on_sync;
 
-
     sysinit();
-
 
     /* Initialize the NimBLE host configuration. */
     log_register("ble_hs", &ble_hs_log, &log_console_handler, NULL,

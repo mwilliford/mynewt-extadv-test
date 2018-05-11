@@ -108,7 +108,6 @@ void advext_tester_init(void) {
 
     int rc;
 
-
     // create test pattern
 
     int len = EXTADV_TEST_PATTERN_LEN;
