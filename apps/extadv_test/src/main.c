@@ -70,7 +70,7 @@ ble_observer_decode_adv_data(uint8_t *adv_data, uint8_t adv_data_len, int status
 
     //int expected = EXTADV_TEST_PATTERN_LEN;
     if (status == 0 ) { // completed
-        console_printf("*************************************** completed ******************************");
+        console_printf("*************************************** completed ******************************\n");
     }
 //    if (EXTADV_TEST_PATTERN_LEN != adv_data_len) {
 //        console_printf("********* NO SIZE MATCH - BAD!  expected = %d : was = %d\n", expected, adv_data_len);
