@@ -14,6 +14,8 @@
 /* Define task stack and task object */
 #define ADVERTISE_SVC_TASK_PRIO         (200)
 #define ADVERTISE_SVC_STACK_SIZE       (800) // TODO:  Tune size
+#if MYNEWT_VAL(ADVEXT_TX_SIDE)
+
 struct os_task advertise_svc_task;
 static os_stack_t advertise_svc_task_stack[ADVERTISE_SVC_STACK_SIZE];
 struct os_eventq g_advertise_svc_evq;
@@ -38,6 +40,7 @@ static struct advertise_svc_state m_state = {
         .running = false,
         .curr_os_event = NULL,
 };
+
 
 /**
  * Lock access to access to m_state and curr_os_event
@@ -125,12 +128,12 @@ inline static void do_advertise_handler(struct os_event * evt) {
  */
 void advertise_svc_task_func() {
     //hal_gpio_init_out(LED_2, 1);
-    uint32_t os_ticks;
+    //uint32_t os_ticks;
 
 
     while(1) { // rate limit a little, study this later.
-        os_time_ms_to_ticks(50, &os_ticks);
-        os_time_delay(os_ticks);
+//        os_time_ms_to_ticks(50, &os_ticks);
+//        os_time_delay(os_ticks);
 
         struct os_event *ev;
 
@@ -248,10 +251,12 @@ app_gap_event_handler(struct ble_gap_event *event, void *arg) {
 }
 
 
-
+#endif
 
 void advertise_svc_init() {
 
+
+#if MYNEWT_VAL(ADVEXT_TX_SIDE)
     log_register("advertise_svc", &advertise_svc_log, &log_console_handler, NULL, LOG_SYSLEVEL);
 
     LOG_INFO(&advertise_svc_log, LOG_MODULE_DEFAULT,"advertise_svc Init\n");
@@ -272,5 +277,5 @@ void advertise_svc_init() {
     os_task_init(&advertise_svc_task, "adv_svc", advertise_svc_task_func, NULL, ADVERTISE_SVC_TASK_PRIO,
                  OS_WAIT_FOREVER, advertise_svc_task_stack, ADVERTISE_SVC_STACK_SIZE);
 
-
+#endif
 }

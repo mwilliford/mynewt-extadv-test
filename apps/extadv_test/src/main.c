@@ -26,7 +26,6 @@
 struct ble_gap_ext_disc_params disc_params;
 
 
-
 #define MY_TASK_PRIO         (128)
 #define MY_STACK_SIZE       (64)
 #define MAX_CBMEM_BUF 2048
@@ -53,6 +52,9 @@ ble_app_set_addr(void)
     assert(rc == 0);
 
 }
+
+#if MYNEWT_VAL(ADVEXT_TX_SIDE) == 0
+
 
 static void
 ble_observer_decode_adv_data(uint8_t *adv_data, uint8_t adv_data_len, int status)
@@ -108,13 +110,13 @@ ble_observer_decode_event_type(struct ble_gap_ext_disc_desc *desc)
     }
 
     switch(desc->data_status) {
-        case 0x00:
+        case BLE_GAP_EXT_ADV_DATA_STATUS_COMPLETE:
             console_printf("completed");
             break;
-        case 0x01:
-            console_printf("incompleted");
+        case BLE_GAP_EXT_ADV_DATA_STATUS_INCOMPLETE:
+            console_printf("incomplete");
             break;
-        case 0x02:
+        case BLE_GAP_EXT_ADV_DATA_STATUS_TRUNCATED:
             console_printf("truncated");
             break;
         case BLE_HCI_ADV_DATA_STATUS_MASK:
@@ -166,13 +168,16 @@ ble_observer_gap_event(struct ble_gap_event *event, void *arg) {
 
 }
 
+#endif
+
+#if (MYNEWT_VAL(ADVEXT_TX_SIDE) == 0)
 static void
 start_observing() {
     int rc;
     struct ble_gap_ext_disc_params uncoded = {0};
 
-    uncoded.window = disc_params.window = 30;
-    uncoded.itvl = disc_params.itvl = 50;
+    uncoded.window = disc_params.window = 100;
+    uncoded.itvl = disc_params.itvl = 110;
     uncoded.passive = true;
 
     uint8_t own_addr_type;
@@ -188,25 +193,25 @@ start_observing() {
     assert(rc == 0);
 }
 
+#endif
+
 static void
 ble_on_sync(void)
 {
     /* Generate a non-resolvable private address. */
     console_printf("ble_app_on_sync\n");
     ble_app_set_addr();
-    if (true) {
-        start_observing();
-    }
-    if (false) {
-        advext_tester_send();
-    }
+
+#if MYNEWT_VAL(ADVEXT_TX_SIDE)
+    advext_tester_send();
+#else
+    start_observing();
+#endif
 }
 
 int
 main(int argc, char **argv)
 {
-
-
     ble_hs_cfg.sync_cb = ble_on_sync;
 
     sysinit();

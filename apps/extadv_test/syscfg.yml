@@ -30,7 +30,10 @@ syscfg.defs:
     value: 50
   EXTADV_MAX_EVENTS:
     description: "max events for broadcast"
-    value: 20
+    value: 0
+  ADVEXT_TX_SIDE:
+    description: "is this the transmitter side, otherwise it is the rx"
+    value: 0
 
 
 # Settings this app overrides.
@@ -66,9 +69,6 @@ syscfg.vals:
 
     LOG_LEVEL: 1
 
-
-    BLE_HCI_EVT_BUF_SIZE: 254
-#    BLE_EXT_ADV_MAX_SIZE: 238
     BLE_EXT_ADV_MAX_SIZE: 1024
 
     OS_MEMPOOL_POISON: 1
@@ -77,4 +77,7 @@ syscfg.vals:
     CONSOLE_RTT: 1
     CONSOLE_UART: 0
     CONSOLE_ECHO: 0
+
+
+
 

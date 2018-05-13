@@ -32,6 +32,7 @@
 #define ADVEXT_TESTER_POOL_SIZE (ADVEXT_TESTER_PAYLOAD_SIZE + \
                             sizeof(struct os_mbuf) + sizeof(struct os_mbuf_pkthdr))
 
+#if MYNEWT_VAL(ADVEXT_TX_SIDE)
 static struct os_mempool advext_tester_adv_pool;
 static struct os_mbuf_pool advext_tester_mbuf_pool;
 static os_membuf_t advext_tester_mem[OS_MEMPOOL_SIZE(ADVEXT_TESTER_NUM_BUFFS, ADVEXT_TESTER_POOL_SIZE)];
@@ -103,8 +104,12 @@ void advext_tester_task_func(void *arg) {
     }
 }
 
+#endif
+
 void advext_tester_init(void) {
     /* Initialize the task */
+
+#if MYNEWT_VAL(ADVEXT_TX_SIDE)
 
     int rc;
 
@@ -132,5 +137,7 @@ void advext_tester_init(void) {
 
     os_task_init(&advext_task, "advext_tester", advext_tester_task_func, NULL, ADVEXT_TESTER_TASK_PRIO,
                  OS_WAIT_FOREVER, advext_tester_task_stack, ADVEXT_TESTER_STACK_SIZE);
+
+#endif
 
 }

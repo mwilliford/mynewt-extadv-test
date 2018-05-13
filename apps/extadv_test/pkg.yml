@@ -34,7 +34,6 @@ pkg.deps:
     - "@apache-mynewt-core/sys/shell"
     - "@apache-mynewt-core/net/nimble/transport/ram"
     - "@apache-mynewt-core/net/nimble/host/util"
-
 pkg.init:
   advertise_svc_init: 500
   advext_tester_init: 501
